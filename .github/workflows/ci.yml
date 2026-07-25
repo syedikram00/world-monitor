@@ -45,8 +45,10 @@ jobs:
       - name: Build Docker Image
         run: |
           docker build \
-            -t $IMAGE_NAME:latest \
-            -t $IMAGE_NAME:${{ github.sha }} .
+          -f docker/Dockerfile \
+          -t $IMAGE_NAME:latest \
+          -t $IMAGE_NAME:${{ github.sha }} \
+          .
 
       - name: Push Docker Image
         run: |
