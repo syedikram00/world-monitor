@@ -1,6 +1,6 @@
 from unittest.mock import patch, MagicMock
-from backend.fetcher import fetch_news, fetch_weather
-from backend.service import store_news, store_weather, run_ingestion_cycle
+from .fetcher import fetch_news, fetch_weather
+from .service import store_news, store_weather, run_ingestion_cycle
 
 
 def test_fetch_news_returns_articles():
