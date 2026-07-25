@@ -1,0 +1,6 @@
+adminUser: admin
+
+adminPassword: Grafana123!
+
+service:
+  type: ClusterIP

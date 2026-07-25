@@ -1,0 +1,5 @@
+extraScrapeConfigs: |
+  - job_name: 'my-app'
+    static_configs:
+      - targets:
+          - world-monitor-app-service.world-monitor-namespace.svc.cluster.local:8001

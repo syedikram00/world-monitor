@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>World Monitor</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+    <style>
+        .ai-summary-box {
+            margin-top: 10px;
+            padding: 10px 12px;
+            background-color: #f8f9fa;
+            border-left: 3px solid #0066cc;
+            border-radius: 4px;
+            font-size: 0.9em;
+            line-height: 1.5;
+        }
+        .btn-summarize {
+            margin-top: 8px;
+            padding: 6px 12px;
+            background-color: #0066cc;
+            color: #ffffff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85em;
+            font-weight: 500;
+            transition: background-color 0.2s ease;
+        }
+        .btn-summarize:hover {
+            background-color: #0052a3;
+        }
+        .summary-error {
+            font-size: 0.85em;
+            color: #d9534f;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+    <div class="topbar"><div class="topbar-inner"><span class="brand">World Monitor</span></div></div>
+    <div class="container">
+        <section>
+            <h2>Weather</h2>
+            <div class="weather-grid">
+                {% for w in weather %}
+                <div class="weather-card">
+                    <div class="city">{{ w.city }}</div>
+                    <div class="temp">{{ w.temperature }}°C</div>
+                    <div class="condition">{{ w.weather_condition }}</div>
+                    <div class="meta">Humidity {{ w.humidity }}% · Wind {{ w.wind_speed }} m/s</div>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+        
+        <section>
+            <h2>Latest News</h2>
+            <div class="news-list">
+                {% for n in news %}
+                <div class="news-item" id="news-item-{{ n.id }}">
+                    <a href="{{ n.url }}" target="_blank" style="text-decoration: none; color: inherit;">
+                        <div class="news-title">{{ n.title }}</div>
+                        <div class="news-desc">{{ n.description }}</div>
+                        <div class="news-source">{{ n.source }}</div>
+                    </a>
+
+                    <!-- AI Summarizer Section -->
+                    <div id="summary-container-{{ n.id }}">
+                        {% if n.summary %}
+                        <div class="ai-summary-box">
+                            <strong>✨ AI Summary:</strong>
+                            <p style="margin: 4px 0 0 0; white-space: pre-line;">{{ n.summary }}</p>
+                        </div>
+                        {% else %}
+                        <button class="btn-summarize" onclick="generateSummary('{{ n.id }}')">
+                            ✨ Summarize with AI
+                        </button>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+    </div>
+
+    <script>
+    async function generateSummary(articleId) {
+        const container = document.getElementById(`summary-container-${articleId}`);
+        container.innerHTML = `<span style="font-size:0.85em; color: #666;">Generating summary...</span>`;
+
+        try {
+            const response = await fetch(`/articles/${articleId}/summarize`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            const data = await response.json();
+
+            // Handle HTTP errors cleanly and surface the exact backend message
+            if (!response.ok) {
+                throw new Error(data.detail || 'Failed to generate summary');
+            }
+            
+            // Format Gemini bullet points for clean HTML rendering
+            const cleanSummary = (data.summary || '')
+                .replace(/^\*\s+/gm, '• ') // Replace leading asterisks with bullet symbols
+                .trim();
+
+            container.innerHTML = `
+                <div class="ai-summary-box">
+                    <strong>✨ AI Summary:</strong>
+                    <p style="margin: 4px 0 0 0; white-space: pre-line;">${cleanSummary}</p>
+                </div>
+            `;
+        } catch (error) {
+            console.error('Error generating summary:', error);
+            container.innerHTML = `
+                <span class="summary-error">Error: ${error.message}</span>
+                <button class="btn-summarize" onclick="generateSummary('${articleId}')" style="margin-left:8px;">Retry</button>
+            `;
+        }
+    }
+    </script>
+</body>
+</html>

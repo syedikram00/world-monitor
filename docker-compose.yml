@@ -14,7 +14,9 @@ services:
 
 
   app:
-   build: .
+   build:
+     context: .
+     dockerfile: Dockerfile
    container_name: world-monitor-app
    ports:
    - "8001:8001"
@@ -22,6 +24,24 @@ services:
    - db
    environment:
      DATABASE_URL: postgresql+psycopg://postgres:postgres@db:5432/ingestion
+     GEMINI_API_KEY: ${GEMINI_API_KEY}
+   env_file:
+    - .env
+  
+
+  dashboard:
+   build:
+     context: .
+     dockerfile: Dockerfile.UI
+   image: world-monitor-dashboard:latest 
+   container_name: dashboard
+   ports:
+   - "8000:8000"
+   volumes:
+    - .:/app
+   environment:
+     DATABASE_URL: postgresql+psycopg://postgres:postgres@db:5432/ingestion
+     GEMINI_API_KEY: ${GEMINI_API_KEY}
    env_file:
     - .env
   

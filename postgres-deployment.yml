@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres-deployment
+  namespace: world-monitor-namespace
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres-deployment
+  template:
+    metadata:
+      labels:
+        app: postgres-deployment
+    spec:
+     containers:
+       - name: postgres-deployment
+         image: postgres:16
+         env:
+           - name: POSTGRES_DB
+             value: ingestion
+           - name: POSTGRES_USER
+             value: postgres
+           - name: POSTGRES_PASSWORD
+             value: postgres
+         ports:
+         - containerPort: 5432
